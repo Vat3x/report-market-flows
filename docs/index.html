@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Market - User Flows</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .nav {
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding: 16px 32px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-brand {
+            font-size: 18px;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-right: 24px;
+        }
+        .nav-tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #94a3b8;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .nav-tab:hover { color: #e2e8f0; background: #334155; }
+        .nav-tab.active {
+            color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        /* Flow Container */
+        .flow-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 32px;
+            display: none;
+        }
+        .flow-container.active { display: block; }
+
+        .flow-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .flow-subtitle {
+            color: #94a3b8;
+            margin-bottom: 32px;
+            font-size: 15px;
+        }
+
+        /* Flowchart */
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .node {
+            padding: 16px 24px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 220px;
+            max-width: 340px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid;
+        }
+        .node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .node-start {
+            background: linear-gradient(135deg, #1e3a5f, #1e293b);
+            border-color: #3b82f6;
+        }
+        .node-action {
+            background: linear-gradient(135deg, #1e293b, #1a1f2e);
+            border-color: #6366f1;
+        }
+        .node-decision {
+            background: linear-gradient(135deg, #292524, #1e293b);
+            border-color: #f59e0b;
+            transform: rotate(0deg);
+            border-radius: 12px;
+        }
+        .node-success {
+            background: linear-gradient(135deg, #14532d, #1e293b);
+            border-color: #22c55e;
+        }
+        .node-danger {
+            background: linear-gradient(135deg, #450a0a, #1e293b);
+            border-color: #ef4444;
+        }
+        .node-info {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-color: #64748b;
+        }
+
+        .node-label {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        .node-desc {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* Arrow */
+        .arrow {
+            width: 2px;
+            height: 32px;
+            background: #475569;
+            position: relative;
+        }
+        .arrow::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: -4px;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid #475569;
+        }
+        .arrow-label {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        /* Split/Branch */
+        .branch {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        .branch-path {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+        .branch-connector {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            height: 40px;
+        }
+        .branch-line {
+            position: absolute;
+            top: 0;
+            height: 2px;
+            background: #475569;
+        }
+        .branch-label {
+            font-size: 12px;
+            color: #f59e0b;
+            font-weight: 600;
+            padding: 4px 10px;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        /* Detail Panel */
+        .detail-panel {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 32px;
+            display: none;
+        }
+        .detail-panel.visible { display: block; }
+        .detail-panel h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #60a5fa;
+        }
+        .detail-panel ul {
+            list-style: none;
+            padding: 0;
+        }
+        .detail-panel li {
+            padding: 6px 0;
+            font-size: 14px;
+            color: #cbd5e1;
+            border-bottom: 1px solid #1e293b;
+        }
+        .detail-panel li::before {
+            content: '→ ';
+            color: #6366f1;
+        }
+
+        /* Form Preview */
+        .form-preview {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .form-field {
+            margin-bottom: 10px;
+        }
+        .form-field label {
+            display: block;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+        .form-field .input-mock {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* Rating Display */
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 12px 0;
+        }
+        .rating-score {
+            font-size: 36px;
+            font-weight: 800;
+        }
+        .rating-bar {
+            flex: 1;
+            height: 8px;
+            background: #334155;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .rating-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        .rating-green { background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; }
+        .rating-green .rating-score { color: #22c55e; }
+        .rating-green .rating-bar-fill { background: #22c55e; }
+        .rating-yellow { background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; }
+        .rating-yellow .rating-score { color: #eab308; }
+        .rating-yellow .rating-bar-fill { background: #eab308; }
+        .rating-red { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; }
+        .rating-red .rating-score { color: #ef4444; }
+        .rating-red .rating-bar-fill { background: #ef4444; }
+
+        /* Severity Table */
+        .severity-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        .severity-table th, .severity-table td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+            font-size: 13px;
+        }
+        .severity-table th {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .severity-table .deduction { color: #ef4444; font-weight: 700; }
+
+        /* Timer */
+        .timer-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+        .timer-bar .clock { font-size: 20px; }
+        .timer-bar .time { font-weight: 700; color: #f59e0b; }
+
+        /* Section divider */
+        .section-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #334155, transparent);
+            margin: 40px 0;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #e2e8f0;
+        }
+
+        /* Sequence diagram */
+        .sequence {
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+        .seq-actor {
+            min-width: 180px;
+            text-align: center;
+        }
+        .seq-actor-name {
+            padding: 10px 16px;
+            background: #1e293b;
+            border: 2px solid #6366f1;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .seq-lifeline {
+            width: 2px;
+            background: #334155;
+            margin: 0 auto;
+            position: relative;
+        }
+        .seq-message {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* Access Matrix */
+        .access-matrix {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        .access-matrix th, .access-matrix td {
+            padding: 12px 16px;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+            font-size: 13px;
+        }
+        .access-matrix th {
+            color: #94a3b8;
+            font-weight: 600;
+            background: #1e293b;
+        }
+        .access-matrix th:first-child, .access-matrix td:first-child {
+            text-align: left;
+        }
+        .check { color: #22c55e; font-size: 18px; }
+        .cross { color: #ef4444; font-size: 18px; }
+        .cond { color: #f59e0b; font-size: 14px; }
+
+        /* Step indicators */
+        .steps {
+            display: flex;
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .step {
+            flex: 1;
+            padding: 16px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .step:hover { border-color: #6366f1; }
+        .step.active { border-color: #6366f1; background: rgba(99, 102, 241, 0.1); }
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .step.active .step-num { background: #6366f1; }
+        .step-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .step-desc { font-size: 12px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <span class="nav-brand">Report Market</span>
+    <div class="nav-tab active" onclick="showFlow('carrier')">Carrier / Dispatcher</div>
+    <div class="nav-tab" onclick="showFlow('driver')">მძღოლი</div>
+    <div class="nav-tab" onclick="showFlow('rating')">რეიტინგის სისტემა</div>
+    <div class="nav-tab" onclick="showFlow('system')">სისტემა</div>
+</nav>
+
+<!-- CARRIER / DISPATCHER FLOW -->
+<div id="flow-carrier" class="flow-container active">
+    <h1 class="flow-title">Carrier / Dispatcher Flow</h1>
+    <p class="flow-subtitle">როლი: ქერიერი ან დისპეტჩერი — რეგისტრირებული მომხმარებელი</p>
+
+    <div class="flowchart">
+        <div class="node node-start" onclick="toggleDetail('landing-detail')">
+            <div class="node-label">Landing Page</div>
+            <div class="node-desc">reportmarket.com</div>
+        </div>
+        <div class="arrow"><span class="arrow-label">"მე ქერიერი/დისპეტჩერი ვარ"</span></div>
+
+        <div class="branch">
+            <div class="branch-path">
+                <span class="branch-label">არსებული</span>
+                <div class="node node-action" onclick="toggleDetail('login-detail')">
+                    <div class="node-label">Login</div>
+                    <div class="node-desc">ელფოსტა + პაროლი</div>
+                </div>
+            </div>
+            <div class="branch-path">
+                <span class="branch-label">ახალი</span>
+                <div class="node node-action" onclick="toggleDetail('register-detail')">
+                    <div class="node-label">Register</div>
+                    <div class="node-desc">სახელი, ელფოსტა, კომპანია, როლი</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="arrow"></div>
+
+        <div class="node node-action" onclick="toggleDetail('dashboard-detail')" style="min-width: 300px;">
+            <div class="node-label">Dashboard</div>
+            <div class="node-desc">მოქმედებები, ისტორია, სტატისტიკა</div>
+        </div>
+        <div class="arrow"></div>
+
+        <div class="branch">
+            <div class="branch-path">
+                <span class="branch-label">ძებნა</span>
+                <div class="node node-info" onclick="toggleDetail('search-detail')">
+                    <div class="node-label">CDL-ით ძებნა</div>
+                    <div class="node-desc">მძღოლის პროფილი + რეიტინგი</div>
+                </div>
+            </div>
+            <div class="branch-path">
+                <span class="branch-label">რეპორტი</span>
+                <div class="node node-danger" onclick="toggleDetail('report-detail')">
+                    <div class="node-label">რეპორტის დაწერა</div>
+                    <div class="node-desc">3-ნაბიჯიანი ფორმა</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="arrow"></div>
+        <div class="node node-success">
+            <div class="node-label">რეპორტი შენახულია</div>
+            <div class="node-desc">Auto-verify (MVP) → რეიტინგი განახლდა</div>
+        </div>
+    </div>
+
+    <!-- Detail Panels -->
+    <div id="register-detail" class="detail-panel">
+        <h3>რეგისტრაციის ფორმა</h3>
+        <div class="form-preview">
+            <div class="form-field"><label>სახელი *</label><div class="input-mock">John Smith</div></div>
+            <div class="form-field"><label>ელფოსტა *</label><div class="input-mock">john@carrier.com</div></div>
+            <div class="form-field"><label>პაროლი *</label><div class="input-mock">••••••••</div></div>
+            <div class="form-field"><label>როლი *</label><div class="input-mock">○ Carrier  ○ Dispatcher</div></div>
+            <div class="form-field"><label>კომპანია *</label><div class="input-mock">Swift Transport LLC</div></div>
+            <div class="form-field"><label>MC ნომერი (Carrier-ისთვის)</label><div class="input-mock">MC-123456</div></div>
+        </div>
+    </div>
+
+    <div id="report-detail" class="detail-panel">
+        <h3>რეპორტის 3 ნაბიჯი</h3>
+        <div class="steps">
+            <div class="step active">
+                <div class="step-num">1</div>
+                <div class="step-title">მძღოლის ინფო</div>
+                <div class="step-desc">CDL ნომერი, სახელი, გვარი, შტატი</div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-title">ინციდენტი</div>
+                <div class="step-desc">კატეგორია, ტიპი, თარიღი, აღწერა</div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-title">დადასტურება</div>
+                <div class="step-desc">გადახედვა და გაგზავნა</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-detail" class="detail-panel">
+        <h3>Dashboard-ის ფუნქციები</h3>
+        <ul>
+            <li>სწრაფი მოქმედებები: ძებნა, რეპორტის დაწერა</li>
+            <li>ბოლო რეპორტები: CDL, კატეგორია, თარიღი, სტატუსი</li>
+            <li>სტატისტიკა: სულ რეპორტები, ტრანსპორტი vs პროფესიონალური</li>
+        </ul>
+    </div>
+
+    <div id="search-detail" class="detail-panel">
+        <h3>CDL ძებნის შედეგები</h3>
+        <ul>
+            <li><b>ნაპოვნია:</b> პროფილი + რეიტინგი + რეპორტების სრული სია (აღწერა ხილვადია)</li>
+            <li><b>არ არსებობს:</b> "სუფთა ჩანაწერი — 100%" + რეპორტის დაწერის ღილაკი</li>
+        </ul>
+    </div>
+
+    <div id="login-detail" class="detail-panel">
+        <h3>Login ფორმა</h3>
+        <div class="form-preview">
+            <div class="form-field"><label>ელფოსტა</label><div class="input-mock">john@carrier.com</div></div>
+            <div class="form-field"><label>პაროლი</label><div class="input-mock">••••••••</div></div>
+        </div>
+    </div>
+
+    <div id="landing-detail" class="detail-panel">
+        <h3>Landing Page სექციები</h3>
+        <ul>
+            <li>Hero: "Know Your Driver Before They Haul Your Load"</li>
+            <li>როგორ მუშაობს (3 ნაბიჯი)</li>
+            <li>CTA: "მე ქერიერი/დისპეტჩერი ვარ" → /register</li>
+            <li>CTA: "მე მძღოლი ვარ" → /driver-check</li>
+        </ul>
+    </div>
+</div>
+
+<!-- DRIVER FLOW -->
+<div id="flow-driver" class="flow-container">
+    <h1 class="flow-title">მძღოლის Flow</h1>
+    <p class="flow-subtitle">როლი: მძღოლი — არარეგისტრირებული, CDL ნომრით იდენტიფიცირება</p>
+
+    <div class="flowchart">
+        <div class="node node-start">
+            <div class="node-label">Landing Page</div>
+            <div class="node-desc">"მე მძღოლი ვარ"</div>
+        </div>
+        <div class="arrow"></div>
+
+        <div class="node node-action">
+            <div class="node-label">CDL ნომრის შეყვანა</div>
+            <div class="node-desc">/driver-check</div>
+        </div>
+        <div class="arrow"></div>
+
+        <div class="node node-decision">
+            <div class="node-label">ჩანაწერი არსებობს?</div>
+        </div>
+        <div class="arrow"></div>
+
+        <div class="branch">
+            <div class="branch-path">
+                <span class="branch-label">არ არსებობს</span>
+                <div class="node node-success">
+                    <div class="node-label">100% — სუფთა</div>
+                    <div class="node-desc">არცერთი რეპორტი</div>
+                </div>
+            </div>
+            <div class="branch-path">
+                <span class="branch-label">არსებობს</span>
+                <div class="node node-info" onclick="toggleDetail('profile-detail')">
+                    <div class="node-label">მძღოლის პროფილი</div>
+                    <div class="node-desc">რეიტინგი + რეპორტების სია</div>
+                </div>
+                <div class="arrow"></div>
+                <div class="node node-decision">
+                    <div class="node-label">რეპორტი &lt; 48სთ?</div>
+                </div>
+                <div class="arrow"></div>
+                <div class="branch">
+                    <div class="branch-path">
+                        <span class="branch-label">დიახ</span>
+                        <div class="node node-danger" onclick="toggleDetail('dispute-detail')">
+                            <div class="node-label">გასაჩივრება</div>
+                            <div class="node-desc">მიზეზის მითითება</div>
+                        </div>
+                        <div class="arrow"></div>
+                        <div class="node node-success">
+                            <div class="node-label">DISPUTED</div>
+                            <div class="node-desc">რეიტინგი იზრდება</div>
+                        </div>
+                    </div>
+                    <div class="branch-path">
+                        <span class="branch-label">არა</span>
+                        <div class="node node-info">
+                            <div class="node-label">ვადა გასულია</div>
+                            <div class="node-desc">გასაჩივრება შეუძლებელია</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Panels -->
+    <div id="profile-detail" class="detail-panel">
+        <h3>მძღოლის პროფილი — ხილვადობა</h3>
+        <table class="access-matrix">
+            <tr><th>ელემენტი</th><th>ხედავს?</th></tr>
+            <tr><td>რეიტინგის ქულა</td><td><span class="check">&#10004;</span></td></tr>
+            <tr><td>კატეგორია / ქვეკატეგორია</td><td><span class="check">&#10004;</span></td></tr>
+            <tr><td>ინციდენტის თარიღი</td><td><span class="check">&#10004;</span></td></tr>
+            <tr><td>რეპორტერის კომპანია</td><td><span class="check">&#10004;</span></td></tr>
+            <tr><td>სიმძიმის ქულა (-X)</td><td><span class="check">&#10004;</span></td></tr>
+            <tr><td>რეპორტის აღწერა</td><td><span class="cross">&#10008;</span> დამალული</td></tr>
+            <tr><td>რეპორტერის სახელი</td><td><span class="cross">&#10008;</span> ანონიმური</td></tr>
+            <tr><td>გასაჩივრების ღილაკი</td><td><span class="cond">&#9200; 48სთ</span></td></tr>
+        </table>
+    </div>
+
+    <div id="dispute-detail" class="detail-panel">
+        <h3>48-საათიანი გასაჩივრების ვადა</h3>
+        <div class="timer-bar">
+            <span class="clock">&#9200;</span>
+            <span>გასაჩივრების ვადა:</span>
+            <span class="time" id="timer-display">36სთ 14წთ</span>
+        </div>
+        <ul>
+            <li>0სთ — ღილაკი აქტიური: "48სთ დარჩა"</li>
+            <li>36სთ — "12სთ დარჩა" &#9888;</li>
+            <li>44სთ — "4სთ დარჩა" &#128308;</li>
+            <li>48სთ — ვადა ამოიწურა, ღილაკი disabled</li>
+        </ul>
+    </div>
+</div>
+
+<!-- RATING SYSTEM FLOW -->
+<div id="flow-rating" class="flow-container">
+    <h1 class="flow-title">რეიტინგის სისტემა</h1>
+    <p class="flow-subtitle">გამოთვლის ლოგიკა, სიმძიმის ქულები და მაგალითები</p>
+
+    <div class="flowchart">
+        <div class="node node-start">
+            <div class="node-label">ახალი მძღოლი</div>
+            <div class="node-desc">CDL შეყვანა → 100%</div>
+        </div>
+        <div class="arrow"><span class="arrow-label">რეპორტი შეიქმნა</span></div>
+        <div class="node node-action">
+            <div class="node-label">status: VERIFIED</div>
+            <div class="node-desc">Auto-verify (MVP)</div>
+        </div>
+        <div class="arrow"></div>
+        <div class="node node-info" style="min-width: 300px;">
+            <div class="node-label">score = max(0, 100 - &Sigma; weights)</div>
+            <div class="node-desc">მხოლოდ VERIFIED რეპორტები</div>
+        </div>
+        <div class="arrow"></div>
+        <div class="branch">
+            <div class="branch-path">
+                <span class="branch-label">80-100%</span>
+                <div class="node node-success">
+                    <div class="node-label">Good Standing</div>
+                </div>
+            </div>
+            <div class="branch-path">
+                <span class="branch-label">50-79%</span>
+                <div class="node" style="background: rgba(234,179,8,0.15); border: 2px solid #eab308;">
+                    <div class="node-label" style="color: #eab308;">Needs Attention</div>
+                </div>
+            </div>
+            <div class="branch-path">
+                <span class="branch-label">0-49%</span>
+                <div class="node node-danger">
+                    <div class="node-label">Critical</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h2 class="section-title">სიმძიმის ქულები</h2>
+    <table class="severity-table">
+        <tr><th>კატეგორია</th><th>ტიპი</th><th>ჩამოჭრა</th></tr>
+        <tr><td>ტრანსპორტი</td><td>დაგვიანება (LATE_DELIVERY)</td><td class="deduction">-5</td></tr>
+        <tr><td>ტრანსპორტი</td><td>ტვირთის დაზიანება (CARGO_DAMAGE)</td><td class="deduction">-10</td></tr>
+        <tr><td>ტრანსპორტი</td><td>ავარია (ACCIDENT)</td><td class="deduction">-15</td></tr>
+        <tr><td>ტრანსპორტი</td><td>DOT ინსპექცია (DOT_INSPECTION)</td><td class="deduction">-8</td></tr>
+        <tr><td>პროფესიონალური</td><td>კომუნიკაცია (COMMUNICATION)</td><td class="deduction">-3</td></tr>
+        <tr><td>პროფესიონალური</td><td>პუნქტუალურობა (PUNCTUALITY)</td><td class="deduction">-4</td></tr>
+        <tr><td>პროფესიონალური</td><td>დოკუმენტაცია (DOCUMENTATION)</td><td class="deduction">-5</td></tr>
+        <tr><td>პროფესიონალური</td><td>უპასუხისმგებლობა (IRRESPONSIBILITY)</td><td class="deduction">-8</td></tr>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <h2 class="section-title">ინტერაქტიული მაგალითები</h2>
+
+    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <div style="flex:1; min-width: 280px;">
+            <h3 style="font-size:14px; color:#94a3b8; margin-bottom:8px;">მაგალითი 1: ახალი მძღოლი</h3>
+            <div class="rating-display rating-green">
+                <div class="rating-score">92%</div>
+                <div style="flex:1">
+                    <div style="font-size:13px; margin-bottom:6px;">Good Standing</div>
+                    <div class="rating-bar"><div class="rating-bar-fill" style="width:92%"></div></div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:4px;">LATE_DELIVERY(-5) + COMMUNICATION(-3) = -8</div>
+                </div>
+            </div>
+        </div>
+        <div style="flex:1; min-width: 280px;">
+            <h3 style="font-size:14px; color:#94a3b8; margin-bottom:8px;">მაგალითი 2: პრობლემური</h3>
+            <div class="rating-display rating-yellow">
+                <div class="rating-score">63%</div>
+                <div style="flex:1">
+                    <div style="font-size:13px; margin-bottom:6px;">Needs Attention</div>
+                    <div class="rating-bar"><div class="rating-bar-fill" style="width:63%"></div></div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:4px;">5 რეპორტი (1 disputed) = -37</div>
+                </div>
+            </div>
+        </div>
+        <div style="flex:1; min-width: 280px;">
+            <h3 style="font-size:14px; color:#94a3b8; margin-bottom:8px;">მაგალითი 3: კრიტიკული</h3>
+            <div class="rating-display rating-red">
+                <div class="rating-score">40%</div>
+                <div style="flex:1">
+                    <div style="font-size:13px; margin-bottom:6px;">Critical</div>
+                    <div class="rating-bar"><div class="rating-bar-fill" style="width:40%"></div></div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:4px;">6 რეპორტი = -60</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h2 class="section-title">Dispute-ის გავლენა</h2>
+    <div style="display:flex; gap:24px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:250px;">
+            <h3 style="font-size:14px; color:#ef4444; margin-bottom:8px;">Dispute-მდე</h3>
+            <div class="rating-display rating-yellow">
+                <div class="rating-score">72%</div>
+                <div style="flex:1">
+                    <div class="rating-bar"><div class="rating-bar-fill" style="width:72%"></div></div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:4px;">ACCIDENT(-15) + CARGO(-10) + COMM(-3)</div>
+                </div>
+            </div>
+        </div>
+        <div style="flex:1; min-width:250px;">
+            <h3 style="font-size:14px; color:#22c55e; margin-bottom:8px;">CARGO_DAMAGE გასაჩივრებულია</h3>
+            <div class="rating-display rating-green">
+                <div class="rating-score">82%</div>
+                <div style="flex:1">
+                    <div class="rating-bar"><div class="rating-bar-fill" style="width:82%"></div></div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:4px;">ACCIDENT(-15) + COMM(-3) | CARGO(disputed)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SYSTEM FLOW -->
+<div id="flow-system" class="flow-container">
+    <h1 class="flow-title">სისტემური ურთიერთქმედება</h1>
+    <p class="flow-subtitle">როგორ ურთიერთქმედებს სისტემის ნაწილები</p>
+
+    <h2 class="section-title">გვერდების ხელმისაწვდომობა</h2>
+    <table class="access-matrix">
+        <tr>
+            <th>გვერდი</th>
+            <th>Carrier / Dispatcher</th>
+            <th>მძღოლი (CDL)</th>
+            <th>სტუმარი</th>
+        </tr>
+        <tr><td>Landing /</td><td><span class="check">&#10004;</span></td><td><span class="check">&#10004;</span></td><td><span class="check">&#10004;</span></td></tr>
+        <tr><td>Login</td><td><span class="check">&#10004;</span></td><td><span class="check">&#10004;</span></td><td><span class="check">&#10004;</span></td></tr>
+        <tr><td>Register</td><td><span class="check">&#10004;</span></td><td><span class="check">&#10004;</span></td><td><span class="check">&#10004;</span></td></tr>
+        <tr><td>Dashboard</td><td><span class="check">&#10004;</span></td><td><span class="cross">&#10008;</span></td><td><span class="cross">&#10008;</span></td></tr>
+        <tr><td>Report / new</td><td><span class="check">&#10004;</span></td><td><span class="cross">&#10008;</span></td><td><span class="cross">&#10008;</span></td></tr>
+        <tr><td>Driver Check</td><td><span class="check">&#10004;</span></td><td><span class="check">&#10004;</span></td><td><span class="check">&#10004;</span></td></tr>
+        <tr><td>Drivers/[cdl]</td><td><span class="check">&#10004;</span> სრული</td><td><span class="cond">&#9888; შეზღუდული</span></td><td><span class="cond">&#9888; შეზღუდული</span></td></tr>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <h2 class="section-title">ავტორიზაციის 3 ფენა</h2>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="padding:16px; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.3); border-radius:12px;">
+            <div style="font-weight:700; color:#818cf8; margin-bottom:4px;">1. Middleware</div>
+            <div style="font-size:13px; color:#94a3b8;">src/middleware.ts — matcher: ["/dashboard/:path*"]<br>auth() → session? → გაატარე ან redirect("/login")</div>
+        </div>
+        <div style="padding:16px; background:rgba(96,165,250,0.1); border:1px solid rgba(96,165,250,0.3); border-radius:12px;">
+            <div style="font-weight:700; color:#60a5fa; margin-bottom:4px;">2. Dashboard Layout</div>
+            <div style="font-size:13px; color:#94a3b8;">src/app/(dashboard)/layout.tsx<br>const session = await auth(); if (!session) redirect("/login")</div>
+        </div>
+        <div style="padding:16px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:12px;">
+            <div style="font-weight:700; color:#22c55e; margin-bottom:4px;">3. Server Actions</div>
+            <div style="font-size:13px; color:#94a3b8;">src/features/reports/actions.ts<br>if (!session?.user?.id) return { error: "Unauthorized" }</div>
+        </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h2 class="section-title">რეპორტის შექმნის Sequence</h2>
+    <div style="overflow-x: auto;">
+        <div style="display:flex; gap:0; min-width:700px;">
+            <div style="flex:1; text-align:center;">
+                <div class="seq-actor-name" style="display:inline-block; padding:8px 16px; background:#1e293b; border:2px solid #6366f1; border-radius:8px; font-weight:600; font-size:13px;">Carrier</div>
+                <div style="display:flex; flex-direction:column; align-items:center; margin-top:12px; gap:12px;">
+                    <div style="padding:8px 12px; background:rgba(99,102,241,0.1); border-radius:6px; font-size:12px;">POST {cdl, category...} →</div>
+                    <div style="padding:8px 12px; font-size:12px; color:#64748b;">...</div>
+                    <div style="padding:8px 12px; background:rgba(34,197,94,0.1); border-radius:6px; font-size:12px;">← Success</div>
+                </div>
+            </div>
+            <div style="flex:1; text-align:center;">
+                <div class="seq-actor-name" style="display:inline-block; padding:8px 16px; background:#1e293b; border:2px solid #f59e0b; border-radius:8px; font-weight:600; font-size:13px;">Server</div>
+                <div style="display:flex; flex-direction:column; align-items:center; margin-top:12px; gap:8px;">
+                    <div style="padding:6px 10px; font-size:11px; color:#94a3b8;">1. Validate (Zod)</div>
+                    <div style="padding:6px 10px; font-size:11px; color:#94a3b8;">2. Check auth (JWT)</div>
+                    <div style="padding:6px 10px; font-size:11px; color:#94a3b8;">3. findOrCreate Driver →</div>
+                    <div style="padding:6px 10px; font-size:11px; color:#94a3b8;">4. CREATE Report →</div>
+                    <div style="padding:6px 10px; font-size:11px; color:#94a3b8;">5. revalidatePath</div>
+                </div>
+            </div>
+            <div style="flex:1; text-align:center;">
+                <div class="seq-actor-name" style="display:inline-block; padding:8px 16px; background:#1e293b; border:2px solid #22c55e; border-radius:8px; font-weight:600; font-size:13px;">Database</div>
+                <div style="display:flex; flex-direction:column; align-items:center; margin-top:12px; gap:8px;">
+                    <div style="padding:6px 10px; font-size:11px; color:#64748b;">...</div>
+                    <div style="padding:6px 10px; font-size:11px; color:#64748b;">...</div>
+                    <div style="padding:6px 10px; font-size:11px; color:#94a3b8;">SELECT drivers WHERE cdl=?</div>
+                    <div style="padding:6px 10px; font-size:11px; color:#94a3b8;">INSERT INTO reports</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showFlow(name) {
+    document.querySelectorAll('.flow-container').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+    document.getElementById('flow-' + name).classList.add('active');
+    event.target.classList.add('active');
+    // hide all detail panels
+    document.querySelectorAll('.detail-panel').forEach(el => el.classList.remove('visible'));
+}
+
+function toggleDetail(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.classList.toggle('visible');
+    }
+}
+
+// Animate rating bars on scroll
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.width = entry.target.dataset.width || entry.target.style.width;
+        }
+    });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.rating-bar-fill').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
