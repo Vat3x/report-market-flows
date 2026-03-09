@@ -15,7 +15,9 @@ import {
   SUBCATEGORY_BY_CATEGORY,
 } from "@/shared/lib/constants";
 import { getSeverityWeight } from "@/features/rating/utils";
-import type { ReportCategory, ReportSubcategory } from "@prisma/client";
+import type { ReportSubcategory } from "@prisma/client";
+
+type ReportCategory = keyof typeof SUBCATEGORY_BY_CATEGORY;
 
 const STEPS = ["Driver Info", "Incident Details", "Review & Confirm"];
 
