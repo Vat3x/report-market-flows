@@ -17,11 +17,24 @@ export default async function HomePage() {
             </div>
             Report Market
           </Link>
-          <Link href={session ? "/dashboard" : "/login"}>
-            <Button size="sm" className="px-6 py-2 bg-white/10 backdrop-blur-md text-white border border-white/20 hover:bg-white/20 hover:border-white/40 font-semibold shadow-lg shadow-black/20 transition-all duration-200">
-              {session ? "My Profile" : "Sign In"}
-            </Button>
-          </Link>
+          {session ? (
+            <Link href="/dashboard" className="flex items-center gap-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 hover:border-white/40 pl-1.5 pr-4 py-1.5 transition-all duration-200">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-xs font-bold text-white shadow-sm">
+                {session.user?.name
+                  ? session.user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+                  : "U"}
+              </div>
+              <span className="text-sm font-semibold text-white">
+                {session.user?.name || "My Profile"}
+              </span>
+            </Link>
+          ) : (
+            <Link href="/login">
+              <Button size="sm" className="px-6 py-2 bg-white/10 backdrop-blur-md text-white border border-white/20 hover:bg-white/20 hover:border-white/40 font-semibold shadow-lg shadow-black/20 transition-all duration-200">
+                Sign In
+              </Button>
+            </Link>
+          )}
         </div>
       </nav>
 
