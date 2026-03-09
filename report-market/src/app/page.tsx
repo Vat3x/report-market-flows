@@ -44,7 +44,7 @@ export default async function HomePage() {
         {/* Animated decorative blobs */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute top-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-blue-600/30 blur-[100px] animate-blob" style={{ animationDelay: "0s" }} />
-          <div className="absolute top-[20%] right-[-5%] h-[400px] w-[400px] rounded-full bg-indigo-600/30 blur-[100px] animate-blob" style={{ animationDelay: "2s" }} />
+          <div className="absolute top-[20%] right-[-15%] h-[400px] w-[400px] rounded-full bg-indigo-600/30 blur-[100px] animate-blob" style={{ animationDelay: "2s" }} />
           <div className="absolute bottom-[-10%] left-[20%] h-[600px] w-[600px] rounded-full bg-sky-500/20 blur-[120px] animate-blob" style={{ animationDelay: "4s" }} />
         </div>
 
