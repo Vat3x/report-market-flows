@@ -16,7 +16,7 @@ export default function HomePage() {
             Report Market
           </Link>
           <Link href="/login">
-            <Button size="sm" className="bg-white text-slate-900 hover:bg-slate-100 border-none font-semibold">Sign In</Button>
+            <Button size="sm" className="bg-white/10 backdrop-blur-md text-white border border-white/20 hover:bg-white/20 hover:border-white/40 font-semibold shadow-lg shadow-black/20 transition-all duration-200">Sign In</Button>
           </Link>
         </div>
       </nav>
