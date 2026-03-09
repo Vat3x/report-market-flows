@@ -20,15 +20,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         try {
           const email = credentials?.email;
-          if (!email) return null;
+          const password = credentials?.password;
+
+          if (!email || !password) return null;
+
+          const emailStr = String(email).trim().toLowerCase();
+          const passwordStr = String(password);
 
           const user = await db.user.findUnique({
-            where: { email: String(email) },
+            where: { email: emailStr },
           });
 
-          if (!user) return null;
+          if (!user || !user.password) return null;
 
-          // TEMP: skip password check to debug auth flow
+          const isValid = await bcrypt.compare(passwordStr, user.password);
+
+          if (!isValid) return null;
+
           return {
             id: user.id,
             email: user.email,

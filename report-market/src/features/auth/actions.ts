@@ -25,7 +25,8 @@ export async function registerUser(formData: FormData): Promise<RegisterResult> 
     return { error: validated.error.issues[0].message };
   }
 
-  const { name, email, password, role, companyName, mcNumber } = validated.data;
+  const { name, password, role, companyName, mcNumber } = validated.data;
+  const email = validated.data.email.trim().toLowerCase();
 
   const existingUser = await db.user.findUnique({ where: { email } });
   if (existingUser) {
