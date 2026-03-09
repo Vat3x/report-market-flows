@@ -15,16 +15,6 @@ export default function HomePage() {
             </div>
             Report Market
           </Link>
-          <div className="flex items-center gap-2">
-            <Link href="/driver-check">
-              <Button variant="ghost" size="sm" className="text-white hover:text-white hover:bg-white/10">
-                Check Rating
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button size="sm" className="bg-white text-slate-900 hover:bg-slate-100 border-none">Sign In</Button>
-            </Link>
-          </div>
         </div>
       </nav>
 
