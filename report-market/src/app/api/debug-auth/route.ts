@@ -1,40 +1,22 @@
-import { db } from "@/server/db";
-import bcrypt from "bcryptjs";
+import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Delete old test user and create fresh one with simple password
-    const testEmail = "demo@test.com";
-    const testPassword = "demo123456";
+    const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
 
-    await db.user.deleteMany({ where: { email: testEmail } });
+    const token = await getToken({ req: request, secret });
 
-    const hashed = await bcrypt.hash(testPassword, 10);
-    await db.user.create({
-      data: {
-        name: "Demo User",
-        email: testEmail,
-        password: hashed,
-        role: "CARRIER",
-        mcNumber: "MC-DEMO",
-      },
-    });
-
-    // Verify
-    const user = await db.user.findUnique({ where: { email: testEmail } });
-    const verified = user?.password
-      ? await bcrypt.compare(testPassword, user.password)
-      : false;
-
-    const allUsers = await db.user.findMany({
-      select: { email: true, name: true },
-    });
+    const cookies = request.cookies
+      .getAll()
+      .map((c) => ({ name: c.name, len: c.value.length }));
 
     return NextResponse.json({
-      testCredentials: { email: testEmail, password: testPassword },
-      passwordVerified: verified,
-      allUsers,
+      hasSecret: !!secret,
+      secretPrefix: secret?.substring(0, 4),
+      token,
+      cookies,
     });
   } catch (error) {
     return NextResponse.json(
