@@ -114,14 +114,14 @@ export function ReportForm() {
                 Driver Information
               </h2>
               <p className="mt-1 text-sm text-slate-400">
-                Enter the driver&apos;s CDL number to identify them
+                Enter the driver&apos;s DL number to identify them
               </p>
             </div>
             <Input
               id="cdlNumber"
               value={formData.cdlNumber}
               onChange={(e) => updateField("cdlNumber", e.target.value)}
-              placeholder="CDL Number (e.g. TX12345678)"
+              placeholder="DL Number (e.g. TX12345678)"
               required
               hint="The driver's Commercial Driver License number"
               icon={
@@ -245,7 +245,7 @@ export function ReportForm() {
 
             <div className="divide-y divide-slate-100 rounded-2xl border border-slate-200/80 bg-slate-50/50">
               <div className="flex items-center justify-between px-5 py-3.5">
-                <span className="text-sm text-slate-400">CDL Number</span>
+                <span className="text-sm text-slate-400">DL Number</span>
                 <span className="rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-sm font-bold text-slate-700">
                   {formData.cdlNumber.toUpperCase()}
                 </span>

@@ -30,7 +30,7 @@ export function CdlLookupForm() {
           name="cdl"
           value={cdl}
           onChange={(e) => setCdl(e.target.value)}
-          placeholder="Enter CDL Number (e.g. TX12345678)"
+          placeholder="Enter DL Number (e.g. TX12345678)"
           required
           className="flex-1 w-full bg-transparent border-none py-3 text-lg font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0"
         />

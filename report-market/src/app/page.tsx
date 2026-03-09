@@ -95,9 +95,9 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-slate-800">Search by CDL</h3>
+              <h3 className="text-xl font-bold text-slate-800">Search by DL</h3>
               <p className="mt-3 text-sm leading-relaxed text-slate-500">
-                Enter a driver&apos;s CDL number to instantly see their
+                Enter a driver&apos;s DL number to instantly see their
                 reputation score and report history.
               </p>
             </div>
@@ -139,8 +139,8 @@ export default function HomePage() {
             <p className="mt-2 text-sm font-medium text-slate-500">Starting driver score</p>
           </div>
           <div className="text-center">
-            <p className="text-5xl font-extrabold tracking-tight bg-gradient-to-br from-blue-600 to-blue-800 bg-clip-text text-transparent">CDL</p>
-            <p className="mt-2 text-sm font-medium text-slate-500">Search by license number</p>
+            <p className="text-5xl font-extrabold tracking-tight bg-gradient-to-br from-blue-600 to-blue-800 bg-clip-text text-transparent">DL</p>
+            <p className="mt-2 text-sm font-medium text-slate-500">Search by DL number</p>
           </div>
           <div className="text-center">
             <p className="text-5xl font-extrabold tracking-tight bg-gradient-to-br from-blue-600 to-blue-800 bg-clip-text text-transparent">48hr</p>

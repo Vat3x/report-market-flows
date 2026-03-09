@@ -58,7 +58,7 @@ export function DriverProfile({ driver, isAuthenticated }: DriverProfileProps) {
             </h1>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
               <span className="inline-flex items-center rounded-xl bg-slate-100 px-3 py-1.5 font-mono text-sm font-bold text-slate-700">
-                CDL: {driver.cdlNumber}
+                DL: {driver.cdlNumber}
               </span>
               {driver.state && (
                 <span className="inline-flex items-center rounded-xl bg-slate-100 px-3 py-1.5 text-sm text-slate-500">

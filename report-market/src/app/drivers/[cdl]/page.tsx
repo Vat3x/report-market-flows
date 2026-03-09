@@ -41,7 +41,7 @@ export default async function DriverPage({ params }: DriverPageProps) {
                   Driver Not Found
                 </h1>
                 <p className="mt-2 text-sm text-slate-400">
-                  No driver found with CDL number:
+                  No driver found with DL number:
                 </p>
                 <p className="mx-auto mt-2 inline-block rounded-xl bg-slate-100 px-4 py-2 font-mono text-sm font-bold text-slate-700">
                   {decodedCdl}

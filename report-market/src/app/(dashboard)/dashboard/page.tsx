@@ -99,7 +99,7 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <p className="font-semibold text-slate-800">Search Driver</p>
-                <p className="text-sm text-slate-400">Look up a driver&apos;s rating by CDL</p>
+                <p className="text-sm text-slate-400">Look up a driver&apos;s rating by DL</p>
               </div>
               <svg className="ml-auto h-5 w-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />

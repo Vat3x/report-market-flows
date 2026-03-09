@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const reportSchema = z.object({
   // Step 1: Driver Info
-  cdlNumber: z.string().min(1, "CDL number is required"),
+  cdlNumber: z.string().min(1, "DL number is required"),
   driverFirstName: z.string().optional(),
   driverLastName: z.string().optional(),
   driverState: z.string().optional(),
@@ -26,7 +26,7 @@ export type ReportInput = z.infer<typeof reportSchema>;
 
 export const disputeSchema = z.object({
   reportId: z.string().min(1, "Report ID is required"),
-  cdlNumber: z.string().min(1, "CDL number is required").transform((v) => v.toUpperCase().trim()),
+  cdlNumber: z.string().min(1, "DL number is required").transform((v) => v.toUpperCase().trim()),
   reason: z
     .string()
     .min(10, "Dispute reason must be at least 10 characters")

@@ -88,7 +88,7 @@ export async function disputeReport(formData: FormData): Promise<DisputeActionRe
   }
 
   if (report.driver.cdlNumber !== cdlNumber) {
-    return { success: false, error: "CDL number does not match this report" };
+    return { success: false, error: "DL number does not match this report" };
   }
 
   if (report.status !== "VERIFIED") {

@@ -36,7 +36,7 @@ export default function DriverCheckPage() {
               Check Driver Rating
             </h1>
             <p className="mt-3 text-base text-slate-500 font-medium pb-4">
-              Look up any driver&apos;s reputation score by their CDL number
+              Look up any driver&apos;s reputation score by their DL number
             </p>
           </div>
 
