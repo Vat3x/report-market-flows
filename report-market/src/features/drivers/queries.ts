@@ -34,7 +34,7 @@ export async function searchDrivers(query: string) {
     },
     include: {
       reports: {
-        select: { subcategory: true, status: true },
+        select: { subcategories: true, status: true },
       },
     },
     take: 10,

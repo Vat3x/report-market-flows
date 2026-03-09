@@ -14,18 +14,11 @@ export async function getReportsByReporter(userId: string) {
 }
 
 export async function getReporterStats(userId: string) {
-  const [totalReports, transportReports, professionalReports] =
-    await Promise.all([
-      db.report.count({ where: { reporterId: userId } }),
-      db.report.count({
-        where: { reporterId: userId, category: "TRANSPORT" },
-      }),
-      db.report.count({
-        where: { reporterId: userId, category: "PROFESSIONAL" },
-      }),
-    ]);
+  const totalReports = await db.report.count({
+    where: { reporterId: userId },
+  });
 
-  return { totalReports, transportReports, professionalReports };
+  return { totalReports };
 }
 
 export async function getPendingDisputes(userId: string) {

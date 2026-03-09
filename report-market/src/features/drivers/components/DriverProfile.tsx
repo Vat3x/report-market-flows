@@ -7,16 +7,14 @@ import { DisputeButton } from "@/features/reports/components/DisputeButton";
 import {
   REPORT_SUBCATEGORY_LABELS,
   REPORT_STATUS_LABELS,
-  REPORT_CATEGORY_LABELS,
 } from "@/shared/lib/constants";
 import { formatDate } from "@/shared/lib/utils";
-import type { ReportCategory, ReportSubcategory, ReportStatus } from "@prisma/client";
+import type { ReportSubcategory, ReportStatus } from "@prisma/client";
 import Link from "next/link";
 
 interface Report {
   id: string;
-  category: ReportCategory;
-  subcategory: ReportSubcategory;
+  subcategories: ReportSubcategory[];
   description: string;
   incidentDate: Date;
   status: ReportStatus;
@@ -131,12 +129,11 @@ export function DriverProfile({ driver, isAuthenticated }: DriverProfileProps) {
               <Card key={report.id} padding="sm">
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <Badge variant="blue">
-                      {REPORT_CATEGORY_LABELS[report.category]}
-                    </Badge>
-                    <Badge>
-                      {REPORT_SUBCATEGORY_LABELS[report.subcategory]}
-                    </Badge>
+                    {report.subcategories.map((sub) => (
+                      <Badge key={sub}>
+                        {REPORT_SUBCATEGORY_LABELS[sub]}
+                      </Badge>
+                    ))}
                     <Badge
                       variant={
                         report.status === "VERIFIED"

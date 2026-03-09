@@ -1,5 +1,36 @@
 import { z } from "zod";
 
+const ALL_SUBCATEGORIES = [
+  "LATE_DELIVERY",
+  "LOAD_CANCELLATION",
+  "POOR_SCHEDULE",
+  "NO_GOOD_TO_GO",
+  "REFUSES_DETENTION",
+  "FAILS_TO_REPORT",
+  "NOT_CHECKING_LOAD",
+  "PUNCTUALITY",
+  "IRRESPONSIBILITY",
+  "RUDE_BEHAVIOR",
+  "HIGH_RATES",
+  "DIRECT_CONTACT",
+  "THREATENS_DELIVERY",
+  "IGNORING_INSTRUCTIONS",
+  "COMMUNICATION",
+  "POOR_COMMUNICATION",
+  "LACK_OF_UNDERSTANDING",
+  "LANGUAGE_BARRIER",
+  "DOCUMENTATION",
+  "DOT_INSPECTION_ISSUE",
+  "INVALID_DOCUMENTS",
+  "NO_TRACKING",
+  "GPS_OFF",
+  "REFUSES_SEAL",
+  "CARGO_DAMAGE",
+  "ACCIDENT",
+  "UNSAFE_DRIVING",
+  "POOR_EQUIPMENT",
+] as const;
+
 export const reportSchema = z.object({
   // Step 1: Driver Info
   cdlNumber: z.string().min(1, "DL number is required"),
@@ -7,17 +38,9 @@ export const reportSchema = z.object({
   driverLastName: z.string().optional(),
   driverState: z.string().optional(),
   // Step 2: Incident Details
-  category: z.enum(["TRANSPORT", "PROFESSIONAL"]),
-  subcategory: z.enum([
-    "LATE_DELIVERY",
-    "CARGO_DAMAGE",
-    "ACCIDENT",
-    "DOT_INSPECTION_ISSUE",
-    "COMMUNICATION",
-    "PUNCTUALITY",
-    "DOCUMENTATION",
-    "IRRESPONSIBILITY",
-  ]),
+  subcategories: z
+    .array(z.enum(ALL_SUBCATEGORIES))
+    .min(1, "Select at least one issue type"),
   incidentDate: z.string().min(1, "Incident date is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
 });

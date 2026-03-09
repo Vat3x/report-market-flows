@@ -25,8 +25,7 @@ export async function createReport(formData: FormData): Promise<ReportActionResu
     driverFirstName: formData.get("driverFirstName") || undefined,
     driverLastName: formData.get("driverLastName") || undefined,
     driverState: formData.get("driverState") || undefined,
-    category: formData.get("category"),
-    subcategory: formData.get("subcategory"),
+    subcategories: formData.getAll("subcategories"),
     incidentDate: formData.get("incidentDate"),
     description: formData.get("description"),
   };
@@ -47,8 +46,7 @@ export async function createReport(formData: FormData): Promise<ReportActionResu
 
   await db.report.create({
     data: {
-      category: data.category,
-      subcategory: data.subcategory,
+      subcategories: data.subcategories,
       description: data.description,
       incidentDate: new Date(data.incidentDate),
       driverId: driver.id,

@@ -5,10 +5,7 @@ import { DisputeReviewCard } from "@/features/reports/components/DisputeReviewCa
 import { Card } from "@/shared/components/ui/Card";
 import { Badge } from "@/shared/components/ui/Badge";
 import { Button } from "@/shared/components/ui/Button";
-import {
-  REPORT_SUBCATEGORY_LABELS,
-  REPORT_CATEGORY_LABELS,
-} from "@/shared/lib/constants";
+import { REPORT_SUBCATEGORY_LABELS } from "@/shared/lib/constants";
 import { formatDate } from "@/shared/lib/utils";
 import Link from "next/link";
 
@@ -45,7 +42,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card gradient>
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50">
@@ -61,27 +58,14 @@ export default async function DashboardPage() {
         </Card>
         <Card gradient>
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50">
-              <svg className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0H21M3.375 14.25h17.25" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-3xl font-bold tracking-tight text-slate-800">{stats.transportReports}</p>
-              <p className="text-sm text-slate-400">Transport</p>
-            </div>
-          </div>
-        </Card>
-        <Card gradient>
-          <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50">
               <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
             <div>
-              <p className="text-3xl font-bold tracking-tight text-slate-800">{stats.professionalReports}</p>
-              <p className="text-sm text-slate-400">Professional</p>
+              <p className="text-3xl font-bold tracking-tight text-slate-800">{pendingDisputes.length}</p>
+              <p className="text-sm text-slate-400">Pending Disputes</p>
             </div>
           </div>
         </Card>
@@ -192,12 +176,11 @@ export default async function DashboardPage() {
                       )}
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <Badge variant="blue" size="sm">
-                        {REPORT_CATEGORY_LABELS[report.category]}
-                      </Badge>
-                      <Badge size="sm">
-                        {REPORT_SUBCATEGORY_LABELS[report.subcategory]}
-                      </Badge>
+                      {report.subcategories.map((sub) => (
+                        <Badge key={sub} size="sm">
+                          {REPORT_SUBCATEGORY_LABELS[sub]}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">

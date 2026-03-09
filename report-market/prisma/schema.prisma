@@ -17,19 +17,45 @@ enum UserRole {
 enum ReportCategory {
   TRANSPORT
   PROFESSIONAL
+  COMMUNICATION
+  COMPLIANCE
+  SAFETY
 }
 
 enum ReportSubcategory {
-  // Transport
+  // Transport (load/scheduling)
   LATE_DELIVERY
+  LOAD_CANCELLATION
+  POOR_SCHEDULE
+  NO_GOOD_TO_GO
+  REFUSES_DETENTION
+  FAILS_TO_REPORT
+  NOT_CHECKING_LOAD
+  // Professional (behavior/conduct)
+  PUNCTUALITY
+  IRRESPONSIBILITY
+  RUDE_BEHAVIOR
+  HIGH_RATES
+  DIRECT_CONTACT
+  THREATENS_DELIVERY
+  IGNORING_INSTRUCTIONS
+  // Communication
+  COMMUNICATION
+  POOR_COMMUNICATION
+  LACK_OF_UNDERSTANDING
+  LANGUAGE_BARRIER
+  // Compliance (docs/tracking/procedures)
+  DOCUMENTATION
+  DOT_INSPECTION_ISSUE
+  INVALID_DOCUMENTS
+  NO_TRACKING
+  GPS_OFF
+  REFUSES_SEAL
+  // Safety
   CARGO_DAMAGE
   ACCIDENT
-  DOT_INSPECTION_ISSUE
-  // Professional
-  COMMUNICATION
-  PUNCTUALITY
-  DOCUMENTATION
-  IRRESPONSIBILITY
+  UNSAFE_DRIVING
+  POOR_EQUIPMENT
 }
 
 enum ReportStatus {
@@ -110,10 +136,9 @@ model Driver {
 }
 
 model Report {
-  id          String            @id @default(cuid())
-  category    ReportCategory
-  subcategory ReportSubcategory
-  description String            @db.Text
+  id            String              @id @default(cuid())
+  subcategories ReportSubcategory[]
+  description   String              @db.Text
   incidentDate DateTime
   status        ReportStatus      @default(VERIFIED)
   disputeReason String?           @db.Text

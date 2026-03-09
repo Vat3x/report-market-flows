@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useMultiStepForm } from "@/shared/hooks/useMultiStepForm";
 import { createReport } from "../actions";
 import { Input } from "@/shared/components/ui/Input";
+import { DatePicker } from "@/shared/components/ui/DatePicker";
 import { Button } from "@/shared/components/ui/Button";
 import { Card } from "@/shared/components/ui/Card";
 import { Alert } from "@/shared/components/ui/Alert";
-import { Select } from "@/shared/components/ui/Select";
 import { Badge } from "@/shared/components/ui/Badge";
 import {
   REPORT_CATEGORY_LABELS,
@@ -24,14 +24,14 @@ export function ReportForm() {
     useMultiStepForm(STEPS.length);
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<ReportCategory>("TRANSPORT");
 
   const [formData, setFormData] = useState({
     cdlNumber: "",
     driverFirstName: "",
     driverLastName: "",
     driverState: "",
-    category: "TRANSPORT" as ReportCategory,
-    subcategory: "LATE_DELIVERY" as ReportSubcategory,
+    subcategories: [] as ReportSubcategory[],
     incidentDate: "",
     description: "",
   });
@@ -40,18 +40,43 @@ export function ReportForm() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
 
-  function handleCategoryChange(category: ReportCategory) {
-    const firstSub = SUBCATEGORY_BY_CATEGORY[category][0] as ReportSubcategory;
-    setFormData((prev) => ({ ...prev, category, subcategory: firstSub }));
+  function toggleSubcategory(sub: ReportSubcategory) {
+    setFormData((prev) => {
+      const exists = prev.subcategories.includes(sub);
+      return {
+        ...prev,
+        subcategories: exists
+          ? prev.subcategories.filter((s) => s !== sub)
+          : [...prev.subcategories, sub],
+      };
+    });
   }
+
+  function removeSubcategory(sub: ReportSubcategory) {
+    setFormData((prev) => ({
+      ...prev,
+      subcategories: prev.subcategories.filter((s) => s !== sub),
+    }));
+  }
+
+  const totalPenalty = formData.subcategories.reduce(
+    (sum, sub) => sum + getSeverityWeight(sub),
+    0
+  );
 
   async function handleSubmit() {
     setIsPending(true);
     setError(null);
 
     const fd = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      fd.append(key, value);
+    fd.append("cdlNumber", formData.cdlNumber);
+    fd.append("driverFirstName", formData.driverFirstName);
+    fd.append("driverLastName", formData.driverLastName);
+    fd.append("driverState", formData.driverState);
+    fd.append("incidentDate", formData.incidentDate);
+    fd.append("description", formData.description);
+    formData.subcategories.forEach((sub) => {
+      fd.append("subcategories", sub);
     });
 
     const result = await createReport(fd);
@@ -61,7 +86,7 @@ export function ReportForm() {
     }
   }
 
-  const availableSubcategories = SUBCATEGORY_BY_CATEGORY[formData.category];
+  const availableSubcategories = SUBCATEGORY_BY_CATEGORY[activeCategory];
 
   return (
     <div className="space-y-6">
@@ -164,47 +189,115 @@ export function ReportForm() {
                 Incident Details
               </h2>
               <p className="mt-1 text-sm text-slate-400">
-                Describe what happened and classify the incident
+                Select one or more issue types across categories
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Select
-                id="category"
-                required
-                value={formData.category}
-                onChange={(e) =>
-                  handleCategoryChange(e.target.value as ReportCategory)
-                }
-              >
-                {Object.entries(REPORT_CATEGORY_LABELS).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </Select>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  Category
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(REPORT_CATEGORY_LABELS).map(([key, label]) => {
+                    const catKey = key as ReportCategory;
+                    const selectedCount = formData.subcategories.filter((s) =>
+                      (SUBCATEGORY_BY_CATEGORY[catKey] as readonly string[]).includes(s)
+                    ).length;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setActiveCategory(catKey)}
+                        className={`rounded-xl border-2 px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                          activeCategory === key
+                            ? "border-amber-500 bg-amber-500 text-white shadow-md"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-amber-300 hover:text-amber-600"
+                        }`}
+                      >
+                        {label}
+                        {selectedCount > 0 && (
+                          <span className={`ml-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${
+                            activeCategory === key
+                              ? "bg-white text-amber-600"
+                              : "bg-amber-100 text-amber-600"
+                          }`}>
+                            {selectedCount}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-              <Select
-                id="subcategory"
-                required
-                value={formData.subcategory}
-                onChange={(e) => updateField("subcategory", e.target.value)}
-              >
-                {availableSubcategories.map((key) => (
-                  <option key={key} value={key}>
-                    {REPORT_SUBCATEGORY_LABELS[key]} (-
-                    {getSeverityWeight(key as ReportSubcategory)} pts)
-                  </option>
-                ))}
-              </Select>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  Issue Type
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {availableSubcategories.map((key) => {
+                    const isSelected = formData.subcategories.includes(key as ReportSubcategory);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleSubcategory(key as ReportSubcategory)}
+                        className={`rounded-xl border-2 px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                          isSelected
+                            ? "border-amber-500 bg-amber-500 text-white shadow-md"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-amber-300 hover:text-amber-600"
+                        }`}
+                      >
+                        {REPORT_SUBCATEGORY_LABELS[key]}
+                        <span className={`ml-1.5 text-xs ${
+                          isSelected ? "text-amber-100" : "text-slate-400"
+                        }`}>
+                          -{getSeverityWeight(key as ReportSubcategory)} pts
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
-            <Input
-              id="incidentDate"
-              type="date"
+            {/* Selected Issues Summary */}
+            {formData.subcategories.length > 0 && (
+              <div className="rounded-xl border-2 border-amber-100 bg-amber-50 p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-700">
+                    Selected Issues ({formData.subcategories.length})
+                  </span>
+                  <Badge variant="red">-{totalPenalty} pts total</Badge>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.subcategories.map((sub) => (
+                    <span
+                      key={sub}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-slate-700 ring-1 ring-slate-200"
+                    >
+                      {REPORT_SUBCATEGORY_LABELS[sub]}
+                      <button
+                        type="button"
+                        onClick={() => removeSubcategory(sub)}
+                        className="text-slate-400 hover:text-red-500"
+                      >
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <DatePicker
               value={formData.incidentDate}
-              onChange={(e) => updateField("incidentDate", e.target.value)}
-              max={new Date().toISOString().split("T")[0]}
+              onChange={(date) => updateField("incidentDate", date)}
+              maxDate={new Date().toISOString().split("T")[0]}
+              label="Incident Date"
               required
             />
 
@@ -217,7 +310,7 @@ export function ReportForm() {
                 onChange={(e) => updateField("description", e.target.value)}
                 placeholder="Describe the incident in detail..."
                 rows={4}
-                className="block w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-300 hover:border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+                className="block w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm transition-all duration-200 ease-out placeholder:text-slate-300 hover:border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100"
                 required
                 minLength={10}
               />
@@ -258,20 +351,20 @@ export function ReportForm() {
                   </span>
                 </div>
               )}
-              <div className="flex items-center justify-between px-5 py-3.5">
-                <span className="text-sm text-slate-400">Category</span>
-                <Badge variant="blue">
-                  {REPORT_CATEGORY_LABELS[formData.category]}
-                </Badge>
+              <div className="px-5 py-3.5">
+                <span className="text-sm text-slate-400">Issue Types</span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {formData.subcategories.map((sub) => (
+                    <Badge key={sub} variant="blue">
+                      {REPORT_SUBCATEGORY_LABELS[sub]}
+                    </Badge>
+                  ))}
+                </div>
               </div>
               <div className="flex items-center justify-between px-5 py-3.5">
-                <span className="text-sm text-slate-400">Issue Type</span>
-                <Badge>{REPORT_SUBCATEGORY_LABELS[formData.subcategory]}</Badge>
-              </div>
-              <div className="flex items-center justify-between px-5 py-3.5">
-                <span className="text-sm text-slate-400">Rating Impact</span>
+                <span className="text-sm text-slate-400">Total Rating Impact</span>
                 <Badge variant="red">
-                  -{getSeverityWeight(formData.subcategory)} points
+                  -{totalPenalty} points
                 </Badge>
               </div>
               <div className="flex items-center justify-between px-5 py-3.5">
@@ -290,7 +383,7 @@ export function ReportForm() {
 
             <Alert variant="warning">
               This report will lower the driver&apos;s rating by{" "}
-              <strong>{getSeverityWeight(formData.subcategory)} points</strong>.
+              <strong>{totalPenalty} points</strong>.
               The driver can dispute this within 48 hours.
             </Alert>
           </div>
@@ -318,7 +411,8 @@ export function ReportForm() {
               disabled={
                 (currentStep === 0 && !formData.cdlNumber) ||
                 (currentStep === 1 &&
-                  (!formData.incidentDate ||
+                  (formData.subcategories.length === 0 ||
+                    !formData.incidentDate ||
                     formData.description.length < 10))
               }
             >

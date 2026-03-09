@@ -6,18 +6,14 @@ import { Badge } from "@/shared/components/ui/Badge";
 import { Button } from "@/shared/components/ui/Button";
 import { Alert } from "@/shared/components/ui/Alert";
 import { resolveDispute } from "../actions";
-import {
-  REPORT_SUBCATEGORY_LABELS,
-  REPORT_CATEGORY_LABELS,
-} from "@/shared/lib/constants";
+import { REPORT_SUBCATEGORY_LABELS } from "@/shared/lib/constants";
 import { formatDate } from "@/shared/lib/utils";
-import type { ReportCategory, ReportSubcategory } from "@prisma/client";
+import type { ReportSubcategory } from "@prisma/client";
 
 interface DisputeReviewCardProps {
   report: {
     id: string;
-    category: ReportCategory;
-    subcategory: ReportSubcategory;
+    subcategories: ReportSubcategory[];
     description: string;
     disputeReason: string | null;
     disputedAt: Date | null;
@@ -76,12 +72,11 @@ export function DisputeReviewCard({ report }: DisputeReviewCardProps) {
               )}
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
-              <Badge variant="blue" size="sm">
-                {REPORT_CATEGORY_LABELS[report.category]}
-              </Badge>
-              <Badge size="sm">
-                {REPORT_SUBCATEGORY_LABELS[report.subcategory]}
-              </Badge>
+              {report.subcategories.map((sub) => (
+                <Badge key={sub} size="sm">
+                  {REPORT_SUBCATEGORY_LABELS[sub]}
+                </Badge>
+              ))}
               <Badge variant="yellow" size="sm">
                 Dispute Pending
               </Badge>

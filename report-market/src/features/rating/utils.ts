@@ -2,15 +2,38 @@ import { ReportSubcategory, ReportStatus } from "@prisma/client";
 
 const SEVERITY_WEIGHTS: Record<ReportSubcategory, number> = {
   // Transport
-  LATE_DELIVERY: 5,
-  CARGO_DAMAGE: 10,
-  ACCIDENT: 15,
-  DOT_INSPECTION_ISSUE: 8,
+  LATE_DELIVERY: 18,
+  LOAD_CANCELLATION: 23,
+  POOR_SCHEDULE: 17,
+  NO_GOOD_TO_GO: 18,
+  REFUSES_DETENTION: 17,
+  FAILS_TO_REPORT: 18,
+  NOT_CHECKING_LOAD: 18,
   // Professional
-  COMMUNICATION: 3,
-  PUNCTUALITY: 4,
-  DOCUMENTATION: 5,
-  IRRESPONSIBILITY: 8,
+  PUNCTUALITY: 17,
+  IRRESPONSIBILITY: 21,
+  RUDE_BEHAVIOR: 18,
+  HIGH_RATES: 15,
+  DIRECT_CONTACT: 17,
+  THREATENS_DELIVERY: 23,
+  IGNORING_INSTRUCTIONS: 19,
+  // Communication
+  COMMUNICATION: 16,
+  POOR_COMMUNICATION: 16,
+  LACK_OF_UNDERSTANDING: 16,
+  LANGUAGE_BARRIER: 15,
+  // Compliance
+  DOCUMENTATION: 18,
+  DOT_INSPECTION_ISSUE: 21,
+  INVALID_DOCUMENTS: 21,
+  NO_TRACKING: 19,
+  GPS_OFF: 20,
+  REFUSES_SEAL: 20,
+  // Safety
+  CARGO_DAMAGE: 23,
+  ACCIDENT: 25,
+  UNSAFE_DRIVING: 25,
+  POOR_EQUIPMENT: 21,
 };
 
 export type RatingColor = "green" | "yellow" | "red";
@@ -23,14 +46,15 @@ export interface RatingResult {
 }
 
 export function calculateRating(
-  reports: { subcategory: ReportSubcategory; status: ReportStatus }[]
+  reports: { subcategories: ReportSubcategory[]; status: ReportStatus }[]
 ): RatingResult {
   const verifiedReports = reports.filter(
     (r) => r.status === "VERIFIED" || r.status === "DISPUTE_PENDING"
   );
 
   const totalPenalty = verifiedReports.reduce(
-    (sum, report) => sum + SEVERITY_WEIGHTS[report.subcategory],
+    (sum, report) =>
+      sum + report.subcategories.reduce((s, sub) => s + SEVERITY_WEIGHTS[sub], 0),
     0
   );
 
