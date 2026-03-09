@@ -17,6 +17,7 @@ export const REPORT_SUBCATEGORY_LABELS = {
   REFUSES_DETENTION: "Refuses Detention/Layover",
   FAILS_TO_REPORT: "Fails to Report Issues",
   NOT_CHECKING_LOAD: "Not Checking Load Details",
+  DOING_PARTIALS: "Doing Partials",
   // Professional
   PUNCTUALITY: "Punctuality",
   IRRESPONSIBILITY: "Irresponsibility",
@@ -60,6 +61,7 @@ export const SUBCATEGORY_BY_CATEGORY = {
     "REFUSES_DETENTION",
     "FAILS_TO_REPORT",
     "NOT_CHECKING_LOAD",
+    "DOING_PARTIALS",
   ],
   PROFESSIONAL: [
     "PUNCTUALITY",

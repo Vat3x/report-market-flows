@@ -9,6 +9,7 @@ const SEVERITY_WEIGHTS: Record<ReportSubcategory, number> = {
   REFUSES_DETENTION: 17,
   FAILS_TO_REPORT: 18,
   NOT_CHECKING_LOAD: 18,
+  DOING_PARTIALS: 25,
   // Professional
   PUNCTUALITY: 17,
   IRRESPONSIBILITY: 21,
