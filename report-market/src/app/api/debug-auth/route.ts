@@ -6,7 +6,12 @@ export async function GET(request: NextRequest) {
   try {
     const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
 
-    const token = await getToken({ req: request, secret });
+    const isSecure = request.url.startsWith("https");
+    const cookieName = isSecure
+      ? "__Secure-authjs.session-token"
+      : "authjs.session-token";
+
+    const token = await getToken({ req: request, secret, cookieName, salt: cookieName });
 
     const cookies = request.cookies
       .getAll()
