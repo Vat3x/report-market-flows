@@ -1,13 +1,12 @@
 "use server";
 
 import { db } from "@/server/db";
-import { signIn } from "@/server/auth";
 import bcrypt from "bcryptjs";
 import { registerSchema, loginSchema } from "./schemas";
-import { AuthError } from "next-auth";
 
 export type AuthState = {
   error?: string;
+  success?: boolean;
 } | null;
 
 export async function registerUser(
@@ -49,23 +48,10 @@ export async function registerUser(
     },
   });
 
-  try {
-    await signIn("credentials", {
-      email,
-      password,
-      redirectTo: "/dashboard",
-    });
-  } catch (error) {
-    if (error instanceof AuthError) {
-      return { error: "Failed to sign in after registration" };
-    }
-    throw error;
-  }
-
-  return null;
+  return { success: true };
 }
 
-export async function loginUser(
+export async function validateLogin(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
@@ -79,18 +65,5 @@ export async function loginUser(
     return { error: validated.error.issues[0].message };
   }
 
-  try {
-    await signIn("credentials", {
-      email: validated.data.email,
-      password: validated.data.password,
-      redirectTo: "/dashboard",
-    });
-  } catch (error) {
-    if (error instanceof AuthError) {
-      return { error: "Invalid email or password" };
-    }
-    throw error;
-  }
-
-  return null;
+  return { success: true };
 }

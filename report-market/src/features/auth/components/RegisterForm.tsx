@@ -1,6 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { registerUser, type AuthState } from "../actions";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
@@ -9,10 +12,38 @@ import { Select } from "@/shared/components/ui/Select";
 import Link from "next/link";
 
 export function RegisterForm() {
+  const router = useRouter();
+  const [signingIn, setSigningIn] = useState(false);
+
   const [state, formAction, isPending] = useActionState<AuthState, FormData>(
-    registerUser,
+    async (prevState, formData) => {
+      const result = await registerUser(prevState, formData);
+      if (result?.error) return result;
+
+      // Account created — sign in via client-side
+      setSigningIn(true);
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
+
+      const signInResult = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        setSigningIn(false);
+        return { error: "Account created but sign in failed. Please sign in manually." };
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+      return null;
+    },
     null
   );
+
+  const loading = isPending || signingIn;
 
   return (
     <form action={formAction} className="space-y-5">
@@ -106,8 +137,8 @@ export function RegisterForm() {
         }
       />
 
-      <Button type="submit" className="w-full" loading={isPending}>
-        {isPending ? "Creating account..." : "Create Account"}
+      <Button type="submit" className="w-full" loading={loading}>
+        {signingIn ? "Signing in..." : isPending ? "Creating account..." : "Create Account"}
       </Button>
 
       <div className="relative py-2">

@@ -1,21 +1,51 @@
 "use client";
 
-import { useActionState } from "react";
-import { loginUser, type AuthState } from "../actions";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { Alert } from "@/shared/components/ui/Alert";
 import Link from "next/link";
 
 export function LoginForm() {
-  const [state, formAction, isPending] = useActionState<AuthState, FormData>(
-    loginUser,
-    null
-  );
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsPending(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      setIsPending(false);
+      return;
+    }
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setError("Invalid email or password");
+      setIsPending(false);
+    } else {
+      router.push("/dashboard");
+      router.refresh();
+    }
+  }
 
   return (
-    <form action={formAction} className="space-y-5">
-      {state?.error && <Alert variant="error">{state.error}</Alert>}
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {error && <Alert variant="error">{error}</Alert>}
 
       <Input
         id="email"
