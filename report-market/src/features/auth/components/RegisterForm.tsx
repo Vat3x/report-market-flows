@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { registerUser } from "../actions";
+import { registerUser, type AuthState } from "../actions";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { Alert } from "@/shared/components/ui/Alert";
@@ -9,12 +9,8 @@ import { Select } from "@/shared/components/ui/Select";
 import Link from "next/link";
 
 export function RegisterForm() {
-  const [state, formAction, isPending] = useActionState(
-    async (_prev: { error?: string } | null, formData: FormData) => {
-      const result = await registerUser(formData);
-      if (!result.success) return { error: result.error };
-      return null;
-    },
+  const [state, formAction, isPending] = useActionState<AuthState, FormData>(
+    registerUser,
     null
   );
 

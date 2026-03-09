@@ -5,14 +5,15 @@ import { signIn } from "@/server/auth";
 import bcrypt from "bcryptjs";
 import { registerSchema, loginSchema } from "./schemas";
 import { AuthError } from "next-auth";
-import { redirect } from "next/navigation";
 
-export type ActionResult = {
-  success: boolean;
+export type AuthState = {
   error?: string;
-};
+} | null;
 
-export async function registerUser(formData: FormData): Promise<ActionResult> {
+export async function registerUser(
+  _prevState: AuthState,
+  formData: FormData
+): Promise<AuthState> {
   const rawData = {
     name: formData.get("name"),
     email: formData.get("email"),
@@ -25,14 +26,14 @@ export async function registerUser(formData: FormData): Promise<ActionResult> {
 
   const validated = registerSchema.safeParse(rawData);
   if (!validated.success) {
-    return { success: false, error: validated.error.issues[0].message };
+    return { error: validated.error.issues[0].message };
   }
 
   const { name, email, password, role, companyName, mcNumber } = validated.data;
 
   const existingUser = await db.user.findUnique({ where: { email } });
   if (existingUser) {
-    return { success: false, error: "Email already registered" };
+    return { error: "Email already registered" };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -52,19 +53,22 @@ export async function registerUser(formData: FormData): Promise<ActionResult> {
     await signIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirectTo: "/dashboard",
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      return { success: false, error: "Failed to sign in after registration" };
+      return { error: "Failed to sign in after registration" };
     }
-    return { success: false, error: "Something went wrong" };
+    throw error;
   }
 
-  redirect("/dashboard");
+  return null;
 }
 
-export async function loginUser(formData: FormData): Promise<ActionResult> {
+export async function loginUser(
+  _prevState: AuthState,
+  formData: FormData
+): Promise<AuthState> {
   const rawData = {
     email: formData.get("email"),
     password: formData.get("password"),
@@ -72,21 +76,21 @@ export async function loginUser(formData: FormData): Promise<ActionResult> {
 
   const validated = loginSchema.safeParse(rawData);
   if (!validated.success) {
-    return { success: false, error: validated.error.issues[0].message };
+    return { error: validated.error.issues[0].message };
   }
 
   try {
     await signIn("credentials", {
       email: validated.data.email,
       password: validated.data.password,
-      redirect: false,
+      redirectTo: "/dashboard",
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      return { success: false, error: "Invalid email or password" };
+      return { error: "Invalid email or password" };
     }
-    return { success: false, error: "Something went wrong" };
+    throw error;
   }
 
-  redirect("/dashboard");
+  return null;
 }

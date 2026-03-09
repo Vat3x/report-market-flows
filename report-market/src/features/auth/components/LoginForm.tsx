@@ -1,19 +1,15 @@
 "use client";
 
 import { useActionState } from "react";
-import { loginUser } from "../actions";
+import { loginUser, type AuthState } from "../actions";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { Alert } from "@/shared/components/ui/Alert";
 import Link from "next/link";
 
 export function LoginForm() {
-  const [state, formAction, isPending] = useActionState(
-    async (_prev: { error?: string } | null, formData: FormData) => {
-      const result = await loginUser(formData);
-      if (!result.success) return { error: result.error };
-      return null;
-    },
+  const [state, formAction, isPending] = useActionState<AuthState, FormData>(
+    loginUser,
     null
   );
 
