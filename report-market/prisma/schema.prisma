@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== Enums ====================
+
+enum UserRole {
+  CARRIER
+  DISPATCHER
+}
+
+enum ReportCategory {
+  TRANSPORT
+  PROFESSIONAL
+}
+
+enum ReportSubcategory {
+  // Transport
+  LATE_DELIVERY
+  CARGO_DAMAGE
+  ACCIDENT
+  DOT_INSPECTION_ISSUE
+  // Professional
+  COMMUNICATION
+  PUNCTUALITY
+  DOCUMENTATION
+  IRRESPONSIBILITY
+}
+
+enum ReportStatus {
+  PENDING
+  VERIFIED
+  DISPUTE_PENDING
+  DISPUTED
+}
+
+// ==================== Auth.js Models ====================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ==================== Application Models ====================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String
+  role          UserRole  @default(CARRIER)
+  companyName   String?
+  mcNumber      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  reports  Report[]
+}
+
+model Driver {
+  id        String   @id @default(cuid())
+  cdlNumber String   @unique
+  firstName String?
+  lastName  String?
+  state     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reports Report[]
+
+  @@index([cdlNumber])
+}
+
+model Report {
+  id          String            @id @default(cuid())
+  category    ReportCategory
+  subcategory ReportSubcategory
+  description String            @db.Text
+  incidentDate DateTime
+  status        ReportStatus      @default(VERIFIED)
+  disputeReason String?           @db.Text
+  disputedAt    DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  driverId   String
+  driver     Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  reporterId String
+  reporter   User   @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([driverId])
+  @@index([reporterId])
+}
