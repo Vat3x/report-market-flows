@@ -3,6 +3,8 @@ import { auth } from "@/server/auth";
 import { searchDrivers } from "@/features/drivers/queries";
 import { calculateRating } from "@/features/rating/utils";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const session = await auth();
   if (!session?.user) {
