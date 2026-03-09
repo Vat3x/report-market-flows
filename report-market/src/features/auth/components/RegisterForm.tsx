@@ -1,10 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { registerUser, type AuthState } from "../actions";
+import { registerUser } from "../actions";
 import { Input } from "@/shared/components/ui/Input";
 import { Button } from "@/shared/components/ui/Button";
 import { Alert } from "@/shared/components/ui/Alert";
@@ -13,41 +12,53 @@ import Link from "next/link";
 
 export function RegisterForm() {
   const router = useRouter();
-  const [signingIn, setSigningIn] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
+  const [status, setStatus] = useState<string>("Create Account");
 
-  const [state, formAction, isPending] = useActionState<AuthState, FormData>(
-    async (prevState, formData) => {
-      const result = await registerUser(prevState, formData);
-      if (result?.error) return result;
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsPending(true);
+    setError(null);
+    setStatus("Creating account...");
 
-      // Account created — sign in via client-side
-      setSigningIn(true);
-      const email = formData.get("email") as string;
-      const password = formData.get("password") as string;
+    const formData = new FormData(e.currentTarget);
 
-      const signInResult = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+    // Step 1: Create account via server action
+    const result = await registerUser(formData);
 
-      if (signInResult?.error) {
-        setSigningIn(false);
-        return { error: "Account created but sign in failed. Please sign in manually." };
-      }
+    if (result.error) {
+      setError(result.error);
+      setIsPending(false);
+      setStatus("Create Account");
+      return;
+    }
 
-      router.push("/dashboard");
-      router.refresh();
-      return null;
-    },
-    null
-  );
+    // Step 2: Sign in via client-side
+    setStatus("Signing in...");
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-  const loading = isPending || signingIn;
+    const signInResult = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (signInResult?.error) {
+      setError("Account created. Please sign in manually.");
+      setIsPending(false);
+      setStatus("Create Account");
+      return;
+    }
+
+    router.push("/dashboard");
+    router.refresh();
+  }
 
   return (
-    <form action={formAction} className="space-y-5">
-      {state?.error && <Alert variant="error">{state.error}</Alert>}
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {error && <Alert variant="error">{error}</Alert>}
 
       <Input
         id="name"
@@ -137,8 +148,8 @@ export function RegisterForm() {
         }
       />
 
-      <Button type="submit" className="w-full" loading={loading}>
-        {signingIn ? "Signing in..." : isPending ? "Creating account..." : "Create Account"}
+      <Button type="submit" className="w-full" loading={isPending}>
+        {status}
       </Button>
 
       <div className="relative py-2">

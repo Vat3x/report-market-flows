@@ -2,17 +2,14 @@
 
 import { db } from "@/server/db";
 import bcrypt from "bcryptjs";
-import { registerSchema, loginSchema } from "./schemas";
+import { registerSchema } from "./schemas";
 
-export type AuthState = {
+export type RegisterResult = {
   error?: string;
   success?: boolean;
-} | null;
+};
 
-export async function registerUser(
-  _prevState: AuthState,
-  formData: FormData
-): Promise<AuthState> {
+export async function registerUser(formData: FormData): Promise<RegisterResult> {
   const rawData = {
     name: formData.get("name"),
     email: formData.get("email"),
@@ -47,23 +44,6 @@ export async function registerUser(
       mcNumber,
     },
   });
-
-  return { success: true };
-}
-
-export async function validateLogin(
-  _prevState: AuthState,
-  formData: FormData
-): Promise<AuthState> {
-  const rawData = {
-    email: formData.get("email"),
-    password: formData.get("password"),
-  };
-
-  const validated = loginSchema.safeParse(rawData);
-  if (!validated.success) {
-    return { error: validated.error.issues[0].message };
-  }
 
   return { success: true };
 }
