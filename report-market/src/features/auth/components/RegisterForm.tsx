@@ -39,21 +39,27 @@ export function RegisterForm() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    const signInResult = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const signInResult = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    if (signInResult?.error) {
+      if (!signInResult?.ok) {
+        setError("Account created. Please sign in manually.");
+        setIsPending(false);
+        setStatus("Create Account");
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
       setError("Account created. Please sign in manually.");
       setIsPending(false);
       setStatus("Create Account");
-      return;
     }
-
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (

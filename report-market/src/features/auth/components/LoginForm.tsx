@@ -28,18 +28,24 @@ export function LoginForm() {
       return;
     }
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    if (result?.error) {
-      setError("Invalid email or password");
-      setIsPending(false);
-    } else {
+      if (!result?.ok) {
+        setError("Invalid email or password");
+        setIsPending(false);
+        return;
+      }
+
       router.push("/dashboard");
       router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setIsPending(false);
     }
   }
 
