@@ -3,19 +3,26 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
-  const isSecure = request.url.startsWith("https");
-  const cookieName = isSecure
-    ? "__Secure-authjs.session-token"
-    : "authjs.session-token";
+  let isLoggedIn = false;
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-    cookieName,
-    salt: cookieName,
-  });
+  try {
+    const isSecure = request.url.startsWith("https");
+    const cookieName = isSecure
+      ? "__Secure-authjs.session-token"
+      : "authjs.session-token";
 
-  const isLoggedIn = !!token;
+    const token = await getToken({
+      req: request,
+      secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+      cookieName,
+      salt: cookieName,
+    });
+
+    isLoggedIn = !!token;
+  } catch {
+    // Invalid or stale cookie - treat as not logged in
+  }
+
   const isOnDashboard = request.nextUrl.pathname.startsWith("/dashboard");
   const isOnAuth =
     request.nextUrl.pathname.startsWith("/login") ||
