@@ -5,6 +5,7 @@ import { signIn } from "@/server/auth";
 import bcrypt from "bcryptjs";
 import { registerSchema, loginSchema } from "./schemas";
 import { AuthError } from "next-auth";
+import { redirect } from "next/navigation";
 
 export type ActionResult = {
   success: boolean;
@@ -51,16 +52,16 @@ export async function registerUser(formData: FormData): Promise<ActionResult> {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/dashboard",
+      redirect: false,
     });
   } catch (error) {
     if (error instanceof AuthError) {
       return { success: false, error: "Failed to sign in after registration" };
     }
-    throw error;
+    return { success: false, error: "Something went wrong" };
   }
 
-  return { success: true };
+  redirect("/dashboard");
 }
 
 export async function loginUser(formData: FormData): Promise<ActionResult> {
@@ -78,14 +79,14 @@ export async function loginUser(formData: FormData): Promise<ActionResult> {
     await signIn("credentials", {
       email: validated.data.email,
       password: validated.data.password,
-      redirectTo: "/dashboard",
+      redirect: false,
     });
   } catch (error) {
     if (error instanceof AuthError) {
       return { success: false, error: "Invalid email or password" };
     }
-    throw error;
+    return { success: false, error: "Something went wrong" };
   }
 
-  return { success: true };
+  redirect("/dashboard");
 }
