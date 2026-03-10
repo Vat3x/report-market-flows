@@ -176,18 +176,18 @@ export default async function DashboardPage() {
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {report.subcategories.map((sub, i) => (
-                        <span key={sub} className="flex items-center gap-1.5">
-                          {i > 0 && <span className="text-slate-300">|</span>}
-                          <Badge size="sm" variant="blue">
-                            {REPORT_SUBCATEGORY_LABELS[sub]}
-                          </Badge>
-                          <span className="text-[10px] font-semibold text-red-500">-{getSeverityWeight(sub)}</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {report.subcategories.map((sub) => (
+                        <span
+                          key={sub}
+                          className="rounded-xl border-2 border-amber-500 bg-amber-500 px-3 py-1 text-xs font-medium text-white"
+                        >
+                          {REPORT_SUBCATEGORY_LABELS[sub]}
+                          <span className="ml-1.5 text-amber-100">-{getSeverityWeight(sub)}</span>
                         </span>
                       ))}
-                      <span className="ml-1 text-xs font-bold text-red-500">
-                        ({report.subcategories.reduce((s, sub) => s + getSeverityWeight(sub), 0)} pts)
+                      <span className="text-xs font-bold text-red-500">
+                        -{report.subcategories.reduce((s, sub) => s + getSeverityWeight(sub), 0)} pts
                       </span>
                     </div>
                   </div>
