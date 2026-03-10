@@ -175,9 +175,9 @@ export default async function DashboardPage() {
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
                       {report.subcategories.map((sub) => (
-                        <Badge key={sub} size="sm">
+                        <Badge key={sub} size="sm" variant="blue">
                           {REPORT_SUBCATEGORY_LABELS[sub]}
                         </Badge>
                       ))}

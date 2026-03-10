@@ -21,7 +21,7 @@ export function Badge({
           "px-2.5 py-1 text-xs": size === "md",
         },
         {
-          "bg-slate-100 text-slate-600": variant === "default",
+          "bg-slate-100 text-slate-600 ring-1 ring-slate-200": variant === "default",
           "bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-500/20":
             variant === "green",
           "bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-500/20":
