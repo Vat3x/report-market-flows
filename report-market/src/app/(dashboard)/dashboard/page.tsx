@@ -6,6 +6,7 @@ import { Card } from "@/shared/components/ui/Card";
 import { Badge } from "@/shared/components/ui/Badge";
 import { Button } from "@/shared/components/ui/Button";
 import { REPORT_SUBCATEGORY_LABELS } from "@/shared/lib/constants";
+import { getSeverityWeight } from "@/features/rating/utils";
 import { formatDate } from "@/shared/lib/utils";
 import Link from "next/link";
 
@@ -175,12 +176,19 @@ export default async function DashboardPage() {
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {report.subcategories.map((sub) => (
-                        <Badge key={sub} size="sm" variant="blue">
-                          {REPORT_SUBCATEGORY_LABELS[sub]}
-                        </Badge>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {report.subcategories.map((sub, i) => (
+                        <span key={sub} className="flex items-center gap-1.5">
+                          {i > 0 && <span className="text-slate-300">|</span>}
+                          <Badge size="sm" variant="blue">
+                            {REPORT_SUBCATEGORY_LABELS[sub]}
+                          </Badge>
+                          <span className="text-[10px] font-semibold text-red-500">-{getSeverityWeight(sub)}</span>
+                        </span>
                       ))}
+                      <span className="ml-1 text-xs font-bold text-red-500">
+                        ({report.subcategories.reduce((s, sub) => s + getSeverityWeight(sub), 0)} pts)
+                      </span>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
